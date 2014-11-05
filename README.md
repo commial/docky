@@ -21,7 +21,150 @@ registries. That's why we made *Docky*.
 Features
 ========
 
-TODO
+Available options :
+```ShellSession
+$> python docky.py 
+Minimalist Docker client.
+
+Actions:
+  clean                   Cleanning actions               
+  images                List available images             
+   pull     Pull an image or a repository from a registry 
+  search                 Search for an image              
+ transfer   Transfer an image from a registry to another
+```
+
+To select an action, use `python docky.py [ACTION] [ACTION ARGUMENTS]`. *Docky* automatically completes the command line: `python docky.py c` is equivalent to `python docky.py clean`.
+
+Clean
+-----
+
+```Org
+$ python docky.py clean
+7 images unammed ('<none>:<none>') founds.
+Remove them (N)? y
+Removing 915e79a73c...
+Removing 95d070bc92...
+Removing 1d9496e2b5...
+Removing 97e5b30b1c...
+Removing 1762a60e76...
+Removing facad4c7eb...
+Removing 50f90cae2a...
+3 containers exited founds.
+       NAME       |           IMAGE           | COMMAND               
+--------------------------------------------------------
+    high_morse    |      imatest:latest       | /bin/sh 
+ focused_poincare | 192.168.20.20/test:v0.321 | /bin/sh
+ pensive_lumiere  | 192.168.20.20/test:v0.322 | /bin/sh
+Remove some of them (N)? y
+        Remove high_morse (N)? n
+        Remove focused_poincare (N)? n
+        Remove pensive_lumiere (N)? y
+1 identities founds: 
+        - user1@127.0.0.1:5000
+        - usertest@192.168.20.20
+Remove some of them (N)? y
+        Remove user1@127.0.0.1:5000 (N)? y
+        Remove usertest@192.168.20.20 (N)? n
+```
+
+Images
+------
+
+Registries name are translated according to the configuration:
+
+```Org
+$ python docky.py images
+   REGISTRY    |  REPOSITORY   |  TAG   |  IMAGE ID  |       CREATED       | VIRTUAL SIZE 
+------------------------------------------------------------------------------------------
+     Local     | commial/sibyl | latest | 2f3ee6fef3 | 21/10/2014 16:51:18 |   429.4 MB   
+   Docker.io   | commial/sibyl | latest | 2f3ee6fef3 | 21/10/2014 16:51:18 |   429.4 MB   
+   Docker.io   | miasm/tested  | latest | dfce8fc63a | 21/10/2014 08:59:30 |   429.3 MB   
+     Local     |     miasm     |  base  | 35cf8a7cf4 | 29/09/2014 15:43:00 |   440.0 MB   
+   Docker.io   |  miasm/base   | latest | 35cf8a7cf4 | 29/09/2014 15:43:00 |   440.0 MB   
+     Local     |  miasm/base   | latest | 35cf8a7cf4 | 29/09/2014 15:43:00 |   440.0 MB   
+   Docker.io   |    debian     | jessie | ff478fc127 | 23/09/2014 22:38:34 |   115.0 MB   
+   Docker.io   |    ubuntu     | latest | 826544226f | 04/09/2014 18:41:55 |   194.2 MB   
+   Docker.io   |   registry    | latest | e42d15ec84 | 27/08/2014 02:38:29 |   455.0 MB   
+   Docker.io   |    debian     | latest | c1eec48018 | 12/08/2014 03:54:58 |   85.2 MB 
+```
+
+To sort images:
+```Org
+$ python docky.py images -s REGISTRY
+   REGISTRY    |  REPOSITORY   |  TAG   |  IMAGE ID  |       CREATED       | VIRTUAL SIZE 
+------------------------------------------------------------------------------------------
+   Docker.io   | commial/sibyl | latest | 2f3ee6fef3 | 21/10/2014 16:51:18 |   429.4 MB   
+   Docker.io   | miasm/tested  | latest | dfce8fc63a | 21/10/2014 08:59:30 |   429.3 MB   
+   Docker.io   |  miasm/base   | latest | 35cf8a7cf4 | 29/09/2014 15:43:00 |   440.0 MB   
+   Docker.io   |    debian     | jessie | ff478fc127 | 23/09/2014 22:38:34 |   115.0 MB   
+   Docker.io   |    ubuntu     | latest | 826544226f | 04/09/2014 18:41:55 |   194.2 MB   
+   Docker.io   |   registry    | latest | e42d15ec84 | 27/08/2014 02:38:29 |   455.0 MB   
+   Docker.io   |    debian     | latest | c1eec48018 | 12/08/2014 03:54:58 |   85.2 MB    
+     Local     | commial/sibyl | latest | 2f3ee6fef3 | 21/10/2014 16:51:18 |   429.4 MB   
+     Local     |     miasm     |  base  | 35cf8a7cf4 | 29/09/2014 15:43:00 |   440.0 MB   
+     Local     |  miasm/base   | latest | 35cf8a7cf4 | 29/09/2014 15:43:00 |   440.0 MB   
+```
+
+*Docky* automatically completes command line: `docky.py images -s C` is equivalent to `docky.py images -s CREATED`.
+
+Pull
+----
+
+Optional arguments are:
+```ShellSession
+  -r REGISTRY, --registry REGISTRY
+                        Source registry (default is Docker.io)
+  -w, --with-creds      Include credential while pulling (default is not)
+```
+
+Names, instead of URL, can be used for registry argument:
+```ShellSession
+$ python docky.py pull -r Local miasm
+Pulling 127.0.0.1:5000/miasm...
+Download complete layers
+```
+
+Search
+------
+
+```ShellSession
+$ python docky.py search miasm
+Local
+=====
+
+     NAME      | DESCRIPTION | AUTO-BUILD | OFFICIAL | STARS 
+-------------------------------------------------------------
+  miasm/base   |             |            |          |       
+ library/miasm |             |            |          |       
+Docker.io
+=========
+
+     NAME     | DESCRIPTION | AUTO-BUILD | OFFICIAL | STARS 
+------------------------------------------------------------
+  miasm/base  |             |     OK     |          |       
+ miasm/tested |             |     OK     |          |       
+
+```
+
+Transfer
+--------
+
+Optional arguments are:
+```ShellSession
+  -f FROM, --from FROM  Source registry (default is Docker.io)
+  -t TO, --to TO        Destination registry (default is Docker.io)
+```
+
+Transferring official `debian:jessie` image to linux on the `Local` registry:
+```ShellSession
+$ python docky.py transfer debian:jessie -t Local linux
+Transfer debian:jessie -> 127.0.0.1:5000/linux:latest (Y)? 
+'debian:jessie' is locally available (ff478fc127), use it
+Pushing...
+Pushing tag for rev [ff478fc12717] on {http://127.0.0.1:5000/v1/repositories/linux/tags/latest}
+Transfer complete !
+```
 
 Configuration
 =============
