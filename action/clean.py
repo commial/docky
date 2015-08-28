@@ -76,6 +76,9 @@ class ActionClean(Action):
     def clean_exited_container(self):
         self._clean_status_container("Exited")
 
+    def clean_dead_container(self):
+        self._clean_status_container("Dead")
+
     @staticmethod
     def dump_config(credentials):
         config = {}
@@ -113,4 +116,5 @@ class ActionClean(Action):
     def run(self):
         self.clean_images_none()
         self.clean_exited_container()
+        self.clean_dead_container()
         self.clean_creds()
