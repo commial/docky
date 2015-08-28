@@ -48,6 +48,9 @@ class ActionClean(Action):
         targets = []
         for container in self.client.containers(all=True):
             if container["Status"].startswith(status):
+                # Sanitize
+                if container["Names"] is None:
+                    container["Names"] = ["NO_NAME"]
                 targets.append(container)
 
         if len(targets) == 0:
