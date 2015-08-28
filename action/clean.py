@@ -44,25 +44,25 @@ class ActionClean(Action):
                 # Force is false to avoid bad moves
                 self.client.remove_image(img["Id"], force=False, noprune=False)
 
-    def clean_exited_container(self):
-        exiteds = []
+    def _clean_status_container(self, status):
+        targets = []
         for container in self.client.containers(all=True):
-            if container["Status"].startswith("Exited"):
-                exiteds.append(container)
+            if container["Status"].startswith(status):
+                targets.append(container)
 
-        if len(exiteds) == 0:
-            print "No containers exited found."
+        if len(targets) == 0:
+            print "No containers %s found." % (status.lower())
             return
 
         # Display available elements
-        print "%d containers exited founds." % len(exiteds)
+        print "%d containers %s founds." % (len(targets), status.lower())
         ligs = [["NAME", "IMAGE", "COMMAND"]]
         ligs += [[",".join(c["Names"]).replace("/", ""), c["Image"], c["Command"]]
-                 for c in exiteds]
+                 for c in targets]
         Utils.print_table(ligs)
 
         if Utils.ask("Remove some of them", default="N"):
-            for container in exiteds:
+            for container in targets:
                 if Utils.ask(
                         "\tRemove %s" % container["Names"][0].replace("/", ""),
                         default="N"):
@@ -71,6 +71,10 @@ class ActionClean(Action):
                     self.client.remove_container(container["Id"], v=False,
                                                  link=False,
                                                  force=False)
+
+
+    def clean_exited_container(self):
+        self._clean_status_container("Exited")
 
     @staticmethod
     def dump_config(credentials):
